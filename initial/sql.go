@@ -14,7 +14,7 @@ func InitSql() {
 	host := beego.AppConfig.String("mysqlurls")
 	port, err := beego.AppConfig.Int("mysqlport")
 	dbname := beego.AppConfig.String("mysqldb")
-	//passwd = "abc.123"
+
 	if nil != err {
 		port = 3306
 	}
