@@ -39,13 +39,13 @@ func init() {
 func GetProject(id int64) (Projects, error) {
 	var project Projects
 	var err error
-	//err = utils.GetCache("GetProject.id."+fmt.Sprintf("%d", id), &project)
-	//if err != nil {
-	o := orm.NewOrm()
-	project = Projects{Id: id}
-	err = o.Read(&project)
-	//utils.SetCache("GetProject.id."+fmt.Sprintf("%d", id), project, 600)
-	//}
+	err = utils.GetCache("GetProject.id."+fmt.Sprintf("%d", id), &project)
+	if err != nil {
+		o := orm.NewOrm()
+		project = Projects{Id: id}
+		err = o.Read(&project)
+		utils.SetCache("GetProject.id."+fmt.Sprintf("%d", id), project, 600)
+	}
 	return project, err
 }
 

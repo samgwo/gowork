@@ -1,9 +1,7 @@
 package projects
 
 import (
-	"fmt"
 	"gowork/models"
-	"gowork/utils"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -47,21 +45,21 @@ func ListProjectTeam(projectId int64, page int, offset int) (num int64, err erro
 		offset, _ = beego.AppConfig.Int("pageoffset")
 	}
 	start := (page - 1) * offset
-	errs = utils.GetCache("ListProjectTeam.id."+fmt.Sprintf("%d", projectId), &teams)
-	if errs != nil {
-		cache_expire, _ := beego.AppConfig.Int("cache_expire")
-		o := orm.NewOrm()
-		o.Using("default")
-		qs := o.QueryTable(models.TableName("projects_team"))
-		cond := orm.NewCondition()
-		if projectId > 0 {
-			cond = cond.And("projectid", projectId)
-		}
-		qs = qs.SetCond(cond)
-
-		qs.Limit(offset, start).All(&teams)
-		utils.SetCache("ListProjectTeam.id."+fmt.Sprintf("%d", projectId), teams, cache_expire)
+	//errs = utils.GetCache("ListProjectTeam.id."+fmt.Sprintf("%d", projectId), &teams)
+	// if errs != nil {
+	// cache_expire, _ := beego.AppConfig.Int("cache_expire")
+	o := orm.NewOrm()
+	o.Using("default")
+	qs := o.QueryTable(models.TableName("projects_team"))
+	cond := orm.NewCondition()
+	if projectId > 0 {
+		cond = cond.And("projectid", projectId)
 	}
+	qs = qs.SetCond(cond)
+
+	qs.Limit(offset, start).All(&teams)
+	// utils.SetCache("ListProjectTeam.id."+fmt.Sprintf("%d", projectId), teams, cache_expire)
+	// }
 	return num, errs, teams
 }
 
