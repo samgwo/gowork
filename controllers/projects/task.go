@@ -232,6 +232,15 @@ func (this *AjaxStatusTaskController) Post() {
 		this.ServeJSON()
 		return
 	}
+
+	tsk, _ := GetProjectTask(id)
+	userid := this.BaseController.UserUserId
+	project, _ := GetProject(int64(tsk.Projectid))
+	if userid != tsk.Userid && userid != tsk.Acceptid && project.Userid != userid && project.Projuserid != userid && !strings.Contains(this.GetSession("userPermission").(string), "task-editall") {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "无权设置"}
+		this.ServeJSON()
+		return
+	}
 	err := ChangeProjectTaskStatus(id, this.BaseController.UserUserId, status)
 
 	if err == nil {
@@ -261,6 +270,15 @@ func (this *AjaxAcceptTaskController) Post() {
 	}
 	acceptid, _ := this.GetInt64("acceptid")
 	note := this.GetString("note")
+
+	tsk, _ := GetProjectTask(id)
+	userid := this.BaseController.UserUserId
+	project, _ := GetProject(int64(tsk.Projectid))
+	if project.Userid != userid && project.Projuserid != userid && !strings.Contains(this.GetSession("userPermission").(string), "task-editall") {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "无权设置"}
+		this.ServeJSON()
+		return
+	}
 
 	err := ChangeProjectTaskAccept(id, acceptid, this.BaseController.UserUserId, note)
 
@@ -507,7 +525,7 @@ func (this *AddTaskProjectController) Post() {
 
 	if err == nil {
 		this.Data["json"] = map[string]interface{}{"code": 1, "message": "任务添加成功", "id": fmt.Sprintf("%d", id)}
-		if strings.Contains(this.GetSession("userPermission").(string), "mail-notify") {
+		if acceptid != userid && strings.Contains(this.GetSession("userPermission").(string), "mail-notify") {
 			acceptuser := GetUserEmail(acceptid)
 			domain := beego.AppConfig.String("domain")
 			link := "http://" + domain + "/task/show/" + strconv.FormatInt(task.Id, 10)
@@ -623,6 +641,15 @@ func (this *EditTaskProjectController) Post() {
 			this.SaveToFile("attachment", dir+"/"+filename)
 			filepath = strings.Replace(dir, ".", "", 1) + "/" + filename
 		}
+	}
+	tsk, _ := GetProjectTask(taskid)
+	userid := this.BaseController.UserUserId
+	project, _ := GetProject(int64(tsk.Projectid))
+
+	if userid != tsk.Userid && userid != tsk.Acceptid && project.Userid != userid && project.Projuserid != userid && !strings.Contains(this.GetSession("userPermission").(string), "task-editall") {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "无权设置"}
+		this.ServeJSON()
+		return
 	}
 
 	var task ProjectsTask
@@ -815,12 +842,11 @@ func (this *DeleteTaskProjectController) Post() {
 	prjid := strconv.FormatInt(tsk.Projectid, 10)
 	userid := this.BaseController.UserUserId
 	project, _ := GetProject(int64(tsk.Projectid))
-	if tsk.Userid != userid && project.Userid != userid  && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
+	if tsk.Userid != userid && project.Userid != userid && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "无权设置"}
 		this.ServeJSON()
 		return
 	}
-
 
 	err := DeleteProjectTask(taskid)
 	if err == nil {

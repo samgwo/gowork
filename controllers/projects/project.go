@@ -90,8 +90,8 @@ func (this *AjaxStatusProjectController) Post() {
 	}
 	project, _ := GetProject(int64(id))
 	userid := this.BaseController.UserUserId
-	if project.Userid != userid  && project.Projuserid != userid  && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
-			this.Abort("401")
+	if project.Userid != userid && project.Projuserid != userid && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
+		this.Abort("401")
 	}
 	err := ChangeProjectStatus(id, status)
 
@@ -203,7 +203,7 @@ func (this *EditProjectController) Get() {
 	}
 	userid := this.BaseController.UserUserId
 	if project.Userid != userid && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
-			this.Abort("401")
+		this.Abort("401")
 	}
 	_, _, teams := ListProjectTeam(project.Id, 1, 100)
 	this.Data["teams"] = teams
@@ -224,7 +224,7 @@ func (this *EditProjectController) Post() {
 		this.ServeJSON()
 		return
 	}
-	_, err := GetProject(id)
+	project, err := GetProject(id)
 	if err != nil {
 		this.Data["json"] = map[string]interface{}{"code": 0, "message": "项目不存在"}
 		this.ServeJSON()
@@ -280,6 +280,13 @@ func (this *EditProjectController) Post() {
 	pro.Testuserid = testuserid
 	pro.Publuserid = publuserid
 
+	userid := this.BaseController.UserUserId
+	if project.Userid != userid && !strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "无权设置"}
+		this.ServeJSON()
+		return
+	}
+
 	err = UpdateProject(id, pro)
 
 	if err == nil {
@@ -308,6 +315,10 @@ func (this *ShowProjectController) Get() {
 		this.Data["url"] = "/project/manage"
 	}
 
+	this.Data["projecteditall"] = 0
+	if strings.Contains(this.GetSession("userPermission").(string), "project-editall") {
+		this.Data["projecteditall"] = 1
+	}
 	this.Data["project"] = project
 	this.TplName = "projects/project-detail.tpl"
 }
