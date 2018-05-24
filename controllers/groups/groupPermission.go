@@ -7,9 +7,7 @@ import (
 	"gowork/utils"
 	"strconv"
 	"strings"
-
-	//"time"
-
+	// "time"
 	//"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/utils/pagination"
 )
@@ -93,12 +91,13 @@ func (this *ManageGroupPermissionController) Post() {
 		groupPermission.Id = utils.SnowFlakeId()
 		groupPermission.Permissionid = int64(pid)
 		err = AddGroupsPermission(groupPermission)
+		// time.Sleep(time.Nanosecond * 3)
 	}
 
 	if err == nil {
 		this.Data["json"] = map[string]interface{}{"code": 1, "message": "操作成功", "id": fmt.Sprintf("%d", groupid)}
 	} else {
-		this.Data["json"] = map[string]interface{}{"code": 0, "message": "添加失败"}
+		this.Data["json"] = map[string]interface{}{"code": 0, "message": "添加失败" + err.Error()}
 	}
 	this.ServeJSON()
 }
