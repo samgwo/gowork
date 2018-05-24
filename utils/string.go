@@ -12,6 +12,10 @@ import (
 	"github.com/zheng-ji/goSnowFlake"
 )
 
+var (
+	iw *goSnowFlake.IdWorker
+)
+
 /*
 func AjaxMsg(code int, message string) {
 	this.Data["json"] = map[string]interface{}{"code": code, "message": message}
@@ -94,8 +98,11 @@ func SendMail(to string, subject string, body string) error {
 	return err
 }
 
+func init() {
+	iw, _ = goSnowFlake.NewIdWorker(1)
+}
+
 func SnowFlakeId() int64 {
-	iw, _ := goSnowFlake.NewIdWorker(1)
 	if id, err := iw.NextId(); err != nil {
 		return 0
 	} else {
@@ -114,4 +121,3 @@ func RemoveDuplicatesAndEmpty(a []string) (ret []string) {
 	}
 	return
 }
-
